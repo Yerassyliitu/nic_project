@@ -23,4 +23,8 @@ class User(Base):
         return UserRead(
             id=self.id,
             email=self.email,
+            username=self.username,
+            role_id=self.role_id,
+            is_active=self.is_active,
+            is_superuser=self.is_superuser
         )

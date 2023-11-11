@@ -1,11 +1,6 @@
 from pydantic import BaseModel
 
 
-class RefreshOutput(BaseModel):
-    access_token: str
-    token_type: str
-
-
 class Login(BaseModel):
     access_token: str
     token_type: str
@@ -18,3 +13,8 @@ class LogOut(BaseModel):
 
 class RefreshInput(BaseModel):
     refresh_token: str
+
+
+class RefreshOutput(BaseModel):
+    access_token: str
+    token_type: str

@@ -1,4 +1,5 @@
 from src.schemas.user import UserCreate
+from src.schemas.auth import RefreshInput
 
 from src.utils.repository import AbstractRepository
 from src.utils.auth_handler import bcrypt_context
@@ -18,5 +19,10 @@ class UserService:
         return user_id
 
     async def get_users(self):
-        users = await self.users_repo.find_all()
+        users = await self.users_repo.get_all()
         return users
+
+    async def get_user(self, filters):
+        user = await self.users_repo.get_one(filters=filters)
+        return user
+
