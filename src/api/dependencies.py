@@ -1,3 +1,5 @@
+from src.repositories.role import RoleRepository
+from src.services.role import RoleService
 from src.repositories.user import UserRepository
 from src.repositories.auth import TokenRepository
 from src.services.user import UserService
@@ -10,3 +12,7 @@ def user_service():
 
 def token_service():
     return TokenService(TokenRepository())
+
+
+def role_service():
+    return RoleService(RoleRepository())
