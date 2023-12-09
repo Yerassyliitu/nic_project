@@ -6,7 +6,6 @@ from fastapi import Request, Form
 from fastapi import APIRouter, HTTPException, Depends
 from starlette.responses import RedirectResponse
 
-from src.schemas.user import UserUpdateSteamId
 from src.services.user import UserService
 from src.utils.steamsignin import SteamSignIn
 
