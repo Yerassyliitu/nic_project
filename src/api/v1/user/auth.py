@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import DecodeError
+from sqlalchemy.exc import IntegrityError
 
 from src.api.dependencies import user_service
 from src.utils.auth_handler import get_current_user, bcrypt_context, create_access_token, \
@@ -24,8 +25,16 @@ async def add_user(
         user: UserCreate,
         users_service: Annotated[UserService, Depends(user_service)],
 ):
-    user_id = await users_service.add_user(user)
-    return {"user_id": user_id}
+    try:
+        user_id = await users_service.add_user(user)
+        return user_id
+    except IntegrityError as e:
+        if "duplicate key value" in str(e):
+            raise HTTPException(status_code=400, detail="Пользователь с таким email или username уже существует")
+        if "Key (role_id)=(1) is not present in table" in str(e):
+            raise HTTPException(status_code=400, detail="Роль 1 не существует")
+        else:
+            raise HTTPException(status_code=400, detail="Неверные данные")
 
 
 @auth_router.post(
