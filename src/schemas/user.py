@@ -9,6 +9,7 @@ class UserRead(BaseModel):
     role_id: int
     is_active: bool = True
     is_superuser: bool = False
+    steam_id: Optional[str] = None
 
 
 class UserCreate(BaseModel):
@@ -17,18 +18,37 @@ class UserCreate(BaseModel):
     password: str
 
 
+
 class UserEdit(BaseModel):
     email: EmailStr
     username: str
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    username: str
-    password: str
 
 
 class UserUpdate(BaseModel):
     password: Optional[str] = None
     email: Optional[EmailStr] = None
 
+
+class UserUpdateSteamId(BaseModel):
+    steam_id: Optional[str] = None
+
+
+class LoginInput(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
+
+
+class LoginOutput(BaseModel):
+    access_token: str
+    token_type: str
+    refresh_token: str
+
+
+class RefreshInput(BaseModel):
+    refresh_token: str
+
+
+class RefreshOutput(BaseModel):
+    access_token: str
+    token_type: str

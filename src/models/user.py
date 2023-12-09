@@ -17,7 +17,9 @@ class User(Base):
     is_active: bool = Column(Boolean, default=True, nullable=False)  #
     is_superuser: bool = Column(Boolean, default=False, nullable=False)  #
 
-    role_id = Column(BigInteger, ForeignKey('Role.id', ondelete='SET NULL'), default=1)  # role of the user
+    role_id = Column(BigInteger, ForeignKey('Role.id', ondelete='SET NULL'), default=1)
+
+    steam_id = Column(String, nullable=True, unique=True)
 
     def to_read_model(self) -> UserRead:
         return UserRead(
@@ -26,5 +28,6 @@ class User(Base):
             username=self.username,
             role_id=self.role_id,
             is_active=self.is_active,
-            is_superuser=self.is_superuser
+            is_superuser=self.is_superuser,
+            steam_id=self.steam_id
         )

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
-from src.api.routers import all_routers
+from src.api.v1.routers import all_routers
 
 app = FastAPI(
     title="website for gamers",
@@ -25,7 +25,7 @@ def home_view():
 
 
 for router in all_routers:
-    app.include_router(router)
+    app.include_router(router, prefix="/api")
 
 
 @app.exception_handler(Exception)
@@ -35,4 +35,4 @@ def validation_exception_handler(request, err):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="main:app", reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

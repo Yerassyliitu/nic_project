@@ -5,22 +5,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import DecodeError
 
-from src.schemas.auth import RefreshInput
-from src.utils.auth_handler import bcrypt_context, create_refresh_token, create_access_token, decode_token, \
-    get_current_user
-from .dependencies import user_service, token_service
-from src.schemas.user import UserCreate
+from src.api.dependencies import user_service
+from src.utils.auth_handler import get_current_user, bcrypt_context, create_access_token, \
+    create_refresh_token, decode_token
+from src.schemas.user import UserCreate, RefreshInput
 from src.services.user import UserService
-from src.services.auth import TokenService
 
 
-user_router = APIRouter(
-    prefix="/users",
-    tags=["Users"],
+auth_router = APIRouter(prefix="/v1/auth", tags=["auth"])
+
+
+@auth_router.post(
+    "/signup/",
+    status_code=201,
+    summary="Регистрация пользователя.",
 )
-
-
-@user_router.post("/signup")
 async def add_user(
         user: UserCreate,
         users_service: Annotated[UserService, Depends(user_service)],
@@ -29,25 +28,31 @@ async def add_user(
     return {"user_id": user_id}
 
 
-@user_router.post("/login")
+@auth_router.post(
+    "/login/",
+    status_code=200,
+    summary="Вход в систему.",
+)
 async def login(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         users_service: Annotated[UserService, Depends(user_service)],
 ):
-    filters = {"username": form_data.username}
-    user = await users_service.get_user(filters=filters)
+    user = await users_service.get_user(username=form_data.username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not bcrypt_context.verify(form_data.password, user.hashed_password):
         raise HTTPException(status_code=404, detail="Неправильный пароль")
-    data = {'email': user.email, 'id': user.id, 'username': user.username, 'user_role': user.role_id}
+    data = {'email': user.email, 'id': user.id, 'username': user.username, 'user_role': user.role_id,
+            'steam_id': user.steam_id}
     token = create_access_token(data=data)
     refresh_token = create_refresh_token(data=data)
     return {'access_token': token, 'token_type': 'bearer', 'refresh_token': refresh_token}
 
 
-@user_router.post(
-    "/refresh/"
+@auth_router.post(
+    "/refresh/",
+    status_code=200,
+    summary="Обновление access token.",
 )
 async def refresh_token_router(
         request: Annotated[RefreshInput, Depends()],
@@ -78,39 +83,16 @@ async def refresh_token_router(
         raise HTTPException(status_code=400, detail="Invalid token")
 
 
-@user_router.get("/")
-async def get_users(
-        users_service: Annotated[UserService, Depends(user_service)],
-):
-    users = await users_service.get_users()
-    return users
 
 
-
-
-@user_router.post(
-    "/logout/"
-)
-async def logout(
-        tokens_service: Annotated[TokenService, Depends(token_service)],
-        token: RefreshInput
-):
-    if_token = await tokens_service.get_revoked_token(token)
-    if if_token:
-        raise HTTPException(status_code=400, detail="Token has already been revoked")
-    await tokens_service.add_revoked_token(token)
-    return {"message": "You have been logged out"}
-
-
-
-@user_router.post(
+@auth_router.post(
     "/current-user/",
     status_code=200,
     summary="Возвращает пользователя.",
     description="Возвращает пользователя.",
-    tags=["auth"]
 )
 async def get_user(
         user: Annotated[dict, Depends(get_current_user)],
 ):
     return {'user': user}
+

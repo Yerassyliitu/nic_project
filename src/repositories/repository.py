@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, delete, update
 
 from settings.database_connection.connection import async_session
 
@@ -18,6 +18,14 @@ class AbstractRepository(ABC):
     async def get_one(self, filters):
         raise NotImplementedError
 
+    @abstractmethod
+    async def delete_one(self, id):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def edit_one(self, id):
+        raise NotImplementedError
+
 
 class SQLAlchemyRepository(AbstractRepository):
     model = None
@@ -29,17 +37,32 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.commit()
             return res.scalar_one()
 
-    async def get_all(self):
+    async def get_all(self, **filters):
         async with async_session() as session:
             stmt = select(self.model)
+            if filters:
+                stmt = stmt.filter_by(**filters)
             res = await session.execute(stmt)
             res = [row[0].to_read_model() for row in res.all()]
             return res
 
-    async def get_one(self, filters=None):
+    async def get_one(self, **filters):
         async with async_session() as session:
             stmt = select(self.model).filter_by(**filters)
             res = await session.execute(stmt)
-            res = res.scalar_one_or_none()
-            return res
+            return res.scalar_one_or_none()
+
+    async def delete_one(self, **filters):
+        async with async_session() as session:
+            stmt = delete(self.model).filter_by(**filters)
+            result = await session.execute(stmt)
+            await session.commit()
+            return bool(result.rowcount)
+
+    async def edit_one(self, data, **filters):
+        async with async_session() as session:
+            stmt = update(self.model).filter_by(**filters).values(**data).returning(self.model)
+            res = await session.execute(stmt)
+            await session.commit()
+            return res.scalar_one_or_none()
 

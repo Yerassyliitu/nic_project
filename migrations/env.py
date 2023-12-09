@@ -12,9 +12,8 @@ from settings.database_connection.connection import metadata
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 from src.models.user import *
-from src.models.auth import *
 from src.models.role import *
-
+from src.models.match import *
 
 config = context.config
 
