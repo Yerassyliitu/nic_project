@@ -81,9 +81,9 @@ async def refresh_token_router(
         username: str = payload.get('username')
         id: int = payload.get('id')
         user_role: int = payload.get('user_role')
-
+        steam_id: str = payload.get('steam_id')
         # Создайте новый access_token с собственным payload
-        new_access_token_payload = {'email': email, 'id': id, 'username': username, 'user_role': user_role}
+        new_access_token_payload = {'email': email, 'id': id, 'username': username, 'user_role': user_role, 'steam_id': steam_id}
 
         access_token = create_access_token(data=new_access_token_payload)
 
