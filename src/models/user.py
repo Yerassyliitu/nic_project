@@ -19,7 +19,7 @@ class User(Base):
 
     role_id = Column(BigInteger, ForeignKey('Role.id', ondelete='SET NULL'), default=1)
 
-    steam_id = Column(String, nullable=True, unique=True)
+    steam_id = Column(String, nullable=True, unique=True, default=0)
 
     def to_read_model(self) -> UserRead:
         return UserRead(
